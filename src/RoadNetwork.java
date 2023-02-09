@@ -293,13 +293,35 @@ public class RoadNetwork extends DefaultHandler {
 		if (qName.equalsIgnoreCase("tag") && inWay) {
 			key = attributes.getValue("k");
 			if (key.equals("highway")) {
-				ways.get(ways.size()-1).setType(attributes.getValue("v"));
+				String atr=attributes.getValue("v");
+				if(atr.equals("footway") || atr.equals("pedestrian")||atr.equals("cycleway")||atr.equals("unclassified")
+				||atr.equals("service")||atr.equals("track")||atr.equals("path")||atr.equals("platform") ||
+						atr.equals("trunk_link")||atr.equals("steps")||atr.equals("no")) {
+					ways.get(ways.size()-1).setType(atr);
+					ways.get(ways.size()-1).setCanUse(false);
+				}
+				else{
+					ways.get(ways.size()-1).setType(atr);
+					ways.get(ways.size()-1).setCanUse(true);
+				}
+
 				isHighway = true;
+			}
+			if(ways.get(ways.size()-1).getType()==null){
+				ways.get(ways.size()-1).setCanUse(false);
 			}
 			if (key.equals("name")) {
-				ways.get(ways.size()-1).setType(attributes.getValue("v"));
+				ways.get(ways.size()-1).setName(attributes.getValue("v"));
 				isHighway = true;
 			}
+//			if(key.equals("building")) {
+//				ways.get(ways.size()-1).setCanUse(false);
+//				isHighway = true;
+//			}
+//			if(key.equals("leisure")) {
+//				ways.get(ways.size()-1).setCanUse(false);
+//				isHighway = true;
+//			}
 		}
 	}
   
