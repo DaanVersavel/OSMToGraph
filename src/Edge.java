@@ -1,18 +1,23 @@
 public class Edge {
-    private Long beginNodeId;
-    private Long endNodeId;
-    private Double[][] speedMatrix;
-    private Double distance;
+    private long beginNodeId;
+    private long endNodeId;
+    private double[][] speedMatrix;
+    private double distance;
 
     public Edge(Long beginNodeId, Long endNodeId) {
         this.beginNodeId = beginNodeId;
         this.endNodeId = endNodeId;
     }
 
-    public Edge(Long beginNodeId, Long endNodeId, Double[][] speedMatrix, Double distance) {
+    public Edge(long beginNodeId, long endNodeId, double[][] speedMatrix, double distance) {
         this.beginNodeId = beginNodeId;
         this.endNodeId = endNodeId;
         this.speedMatrix = speedMatrix;
+        this.distance = distance;
+    }
+    public Edge(long beginNodeId, long endNodeId, double distance) {
+        this.beginNodeId = beginNodeId;
+        this.endNodeId = endNodeId;
         this.distance = distance;
     }
 
@@ -20,13 +25,13 @@ public class Edge {
     //return the passed time from when reaching the node
     public int getTravelTime(int nodeArrivalTime) {
         int travelTime= 0;
-        Double time = (double) nodeArrivalTime;
+        double time = (double) nodeArrivalTime;
         double distanceToGo = distance;
         double speed;
 
         //find Row
-        Double leftBorder= speedMatrix[0][0];
-        Double rightBorder= speedMatrix[1][0];
+        double leftBorder= speedMatrix[0][0];
+        double rightBorder= speedMatrix[1][0];
         int incrementor=0;
         while(!(leftBorder<=nodeArrivalTime) || !(nodeArrivalTime<rightBorder)){
             incrementor++;
@@ -66,8 +71,8 @@ public class Edge {
         this.endNodeId = endNodeId;
     }
 
-    public void calculateDistance() {
-
+    public double getDistance() {
+        return distance;
     }
 
     public void setDistance(double distanceM) {

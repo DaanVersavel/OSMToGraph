@@ -18,21 +18,21 @@ public class Main {
 		double distancceM = distanceKM*1000;
 		return distancceM;
 	}
-	
+
 	public static void main(String[] args) throws NumberFormatException, IOException, ParserConfigurationException, SAXException{
 		String osmFilepath = "src/Input/map1.osm";
 		String region = "Aalst";
-		
+
 		RoadNetwork graph = new RoadNetwork(region);
 		graph.parseOsmFile(osmFilepath);
-		
+
 		System.out.println("Total number of nodes and edges:");
 		System.out.println("nodes: " + graph.numNodes);
 		System.out.println("edges: " + graph.numEdges);
 		System.out.println();
-		
-		graph.reduceToLargestConnectedComponent();
-		
+
+		//graph.reduceToLargestConnectedComponent();
+
 		System.out.println("Largest component number of nodes and edges:");
 		System.out.println("nodes: " + graph.numNodes);
 		System.out.println("edges: " + graph.numEdges);
@@ -61,7 +61,7 @@ public class Main {
 				double distanceM = calculateDistance(nodeParser,graph.nodes.get(p.headNode));
 				e.setDistance(distanceM);
 				nodeParser.addOutgoingEdge(e);
-        	}
+			}
 		}
 		double max = Double.MIN_VALUE;
 		for(NodeParser node : graph.nodes){
@@ -70,59 +70,65 @@ public class Main {
 		System.out.println("Lat MAX: "+max);
 //		System.out.println("Lengte: "+graph.nodes.get(graph.osmIdToNodeIndex.get(533710827)));
 
-		System.out.println("f");
 
-		JFrame frame = new JFrame("Graph Display");
-		frame.add(new GraphDisplay(graph));
-		frame.pack();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+//		JFrame frame = new JFrame("Graph Display");
+//		frame.add(new GraphDisplay(graph));
+//		frame.pack();
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.setVisible(true);
+
+
+		Map<Long,NodeParser> nodesMap = new HashMap<>();
+
+		for(NodeParser node : graph.nodes){
+			nodesMap.put(node.getOsmId(),node);
+		}
 
 
 		//removing of useless nodes
 		//nodes without edges
-		for(int i=0; i< graph.nodes.size();i++){
-			NodeParser node = graph.nodes.get(i);
-			if(node.getOutgoingEdges().isEmpty() && graph.incomingEdges.get(i).isEmpty()){
-				int nodeId=graph.osmIdToNodeIndex.get(node.getOsmId());
-				graph.osmIdToNodeIndex.remove(node.getOsmId());
-				nodeIndexToOsmId.remove(nodeId);
-
-				graph.nodes.remove(i);
+		int index=0;
+		for(NodeParser node : nodesMap.values()){
+			if(node.getOutgoingEdges().isEmpty() && graph.incomingEdges.get(index).isEmpty()){
+//				int nodeId=graph.osmIdToNodeIndex.get(node.getOsmId());
+//				graph.osmIdToNodeIndex.remove(node.getOsmId());
+//				nodeIndexToOsmId.remove(nodeId);
+//				graph.nodes.remove(index);
+				graph.nodes.get(index).setDissabled(true);
 			}
+			index++;
 		}
-		System.out.println("");
-		//nodes with 1 outgoing edges and 1 incomming edges
 
+
+
+		//nodes with 1 outgoing edges and 1 incomming edges
 		for(int i=0; i< graph.nodes.size();i++){
 			NodeParser node = graph.nodes.get(i);
 			//See if node has one incomming and one outgoing edge
 			if(node.getOutgoingEdges().size()==1 && graph.incomingEdges.get(i).size()==1){
-				//node ide from incomming edge
+				//node id from incomming edge
 				EdgeParser incommingEdge = graph.incomingEdges.get(i).get(0);
 				Edge outgoingEdge = node.getOutgoingEdges().get(0);
 
-				NodeParser incomingNode = graph.nodes.get(graph.osmIdToNodeIndex.get(incommingEdge.headNode));
-				NodeParser outgoingNode = graph.nodes.get(Math.toIntExact(outgoingEdge.getEndNodeId()));
+				NodeParser incomingNode = graph.nodes.get(incommingEdge.headNode);
+				NodeParser outgoingNode = graph.nodes.get(graph.osmIdToNodeIndex.get(outgoingEdge.getEndNodeId()));
 
-				Edge newEdge = new Edge(incomingNode.getOsmId(),outgoingNode.getOsmId());
+				double distance = incommingEdge.length+ outgoingEdge.getDistance();
+				Edge newEdge = new Edge(incomingNode.getOsmId(),outgoingNode.getOsmId(),distance);
+
 				//Add new edge to outoing of incomming edge
+				incomingNode.removeOutgoingEdge(nodeIndexToOsmId.get(incommingEdge.headNode));
+				incomingNode.addOutgoingEdge(newEdge);
 
-
-
-
-				int nodeId=graph.osmIdToNodeIndex.get(node.getOsmId());
-				graph.osmIdToNodeIndex.remove(node.getOsmId());
-				nodeIndexToOsmId.remove(nodeId);
-				graph.nodes.remove(i);
+				graph.nodes.get(i).setDissabled(true);
 			}
 		}
 
-
-
-
-
-
+		JFrame frame2 = new JFrame("Graph Display after prunning");
+		frame2.add(new GraphDisplay(graph));
+		frame2.pack();
+		frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame2.setVisible(true);
 
 
 	}

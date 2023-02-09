@@ -343,4 +343,53 @@ public class RoadNetwork extends DefaultHandler {
 		}
 	}
 
+//	public RoadNetwork deepCopy(RoadNetwork copy) {
+//
+//
+//		// Number of Nodes and Edges in the Graph
+//		this.numNodes=copy.nodes.size();
+//		this.numEdges=copy.numEdges;
+//
+//		//Graph Adjacency lists for outgoing and incoming Edges
+//		this.outgoingEdges = new ArrayList<>();
+//		for(int i=0; i<copy.outgoingEdges.size(); i++) {
+//			ArrayList<EdgeParser> temp= new ArrayList<>();
+//
+//			for(EdgeParser edge : copy.outgoingEdges.get(i)) {
+//				temp.add(edge.deepCopy(edge));
+//			}
+//			this.outgoingEdges.add(temp);
+//		}
+//		for(int i=0; i<copy.incomingEdges.size(); i++) {
+//			ArrayList<EdgeParser> temp= new ArrayList<>();
+//			for(EdgeParser edge : copy.incomingEdges.get(i)) {
+//				temp.add(edge.deepCopy(edge));
+//			}
+//			this.incomingEdges.add(temp);
+//		}
+//
+//		// List of all the nodes in the Graph
+//		for(NodeParser node : copy.nodes) {
+//			this.nodes.add(node.deepCopy(node));
+//		}
+//
+//		// Maps osmId of a node to its index in the nodes list
+//		for(long l : copy.osmIdToNodeIndex.keySet()) {
+//			this.osmIdToNodeIndex.put(l,copy.osmIdToNodeIndex.get(l));
+//		}
+//
+//		// List of all road types in the osm file
+//		this.roadTypes.addAll(copy.roadTypes);
+//
+//		// Used to reference all the nodes that make up that particular "way" in the .osm file
+//		this.wayNodes.addAll(copy.wayNodes);
+//
+//        // Speed values based on road type, should be set according to the region
+//        this.speeds.putAll(copy.speeds);
+//
+//        // List of all the Ways in the Graph
+//        this.ways.addAll(copy.ways);
+//
+//        return this;
+//	}
 }

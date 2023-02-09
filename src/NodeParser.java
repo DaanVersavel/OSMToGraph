@@ -2,17 +2,17 @@ import java.util.ArrayList;
 
 public class NodeParser {
 	// The OSM id of the node.
-	private  long osmId;
+	private long osmId;
 	private double latitude;
 	private double longitude;
+	private boolean dissabled;
 	private ArrayList<Edge> outgoingEdges = new ArrayList<>();
-
-
 
 	public NodeParser(long osmId, double latitude, double longitude) {
 		this.osmId = osmId;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.dissabled = false;
 	}
 
 	public long getOsmId() {
@@ -53,6 +53,31 @@ public class NodeParser {
 
 	@Override
 	public String toString() {
-		return (String.valueOf(latitude) + "," + String.valueOf(longitude));		
+		return (String.valueOf(latitude) + "," + String.valueOf(longitude));
+	}
+
+	public void removeOutgoingEdge(long nodeToRemove) {
+		for (int i=0;i<outgoingEdges.size();i++) {
+			Edge edge = outgoingEdges.get(i);
+			if(edge.getBeginNodeId() == nodeToRemove) {
+				outgoingEdges.remove(edge);
+			}
+		}
+	}
+
+	public void setDissabled(boolean b) {
+		this.dissabled= b;
+	}
+
+	public boolean getDissabled() {
+		return dissabled;
+	}
+
+	public NodeParser deepCopy(NodeParser node) {
+		this.osmId = node.osmId;
+		this.latitude = node.getLatitude();
+		this.longitude = node.getLongitude();
+		this.dissabled = node.getDissabled();
+		return this;
 	}
 }
