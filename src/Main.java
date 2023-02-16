@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.*;
-import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -49,8 +48,6 @@ public class Main {
 		graph.pruneNotIpmortantNode(usableNodesIds);
 		graph.fillInNodeMap();
 
-
-
 		//graph.reduceToLargestConnectedComponent();
 		Map<Long,NodeParser> shortest= graph.getLargestConnectedComponent2();
 
@@ -59,11 +56,6 @@ public class Main {
 
 
 
-//		JFrame frame1 = new JFrame("Graph Display hefore prunning");
-//		frame1.add(new GraphDisplay2(usableNodes, graph.nodesMap));
-//		frame1.pack();
-//		frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame1.setVisible(true);
 
 //		//clean incomming and outgoing edges from largest graph component
 //		for(NodeParser node : usableNodes.values()) {
@@ -73,113 +65,87 @@ public class Main {
 
 
 
-		//removing of useless nodes
-		//nodes without edges
-//		int index=0;
-//		for(NodeParser node : usableNodes.values()){
-//			if(node.getOutgoingEdges()!=null){
-//				if(node.getOutgoingEdges().isEmpty() && graph.incomingEdgesMap.get(node.getOsmId()).isEmpty()){
-//					graph.nodes.get(index).setDissabled(true);
-//				}
-//				index++;
-//			}
-//		}
+
+
+		//TODO largest connected werkt en verkleinen ook
+		//TODO nog wegType toekennen aan edges
+		//TODO eventueel grafisch fixen uitbreiden
 
 		//nodes with 1 outgoing edges and 1 incomming edges
-//		boolean change=true;
-//		int index2=0;
-//		while(change){
-//			change=false;
-//			index2++;
-//			System.out.println(index2);
-//			for(NodeParser node : nodesMap.values()){
-//				int numberOfIncommingEdges=graph.incomingEdgesMap.get(node.getOsmId()).size();
-//				//See if node has one incomming and one outgoing edge
-//				if(node.getOutgoingEdges().size()==1 && graph.incomingEdgesMap.get(node.getOsmId()).size()==1 && !node.getDissabled()){
-//					//node id from incomming edge
-//					EdgeParser incommingEdge = graph.incomingEdgesMap.get(node.getOsmId()).get(0);
-//					Edge outgoingEdge = node.getOutgoingEdges().get(0);
-//
-//					long t=nodeIndexToOsmId.get(incommingEdge.headNode);
-//					boolean tl= nodesMap.containsKey(t);
-//					NodeParser incomingNode = nodesMap.get(nodeIndexToOsmId.get(incommingEdge.headNode));
-//					NodeParser outgoingNode = nodesMap.get(outgoingEdge.getEndNodeOsmId());
-//
-//					double distance = incommingEdge.length+ outgoingEdge.getDistance();
-//					Edge newEdge = new Edge(incomingNode.getOsmId(),outgoingNode.getOsmId(),distance);
-//
-//					//Add new edge to outoing of incomming edge
-//					incomingNode.removeOutgoingEdge(nodeIndexToOsmId.get(incommingEdge.headNode));
-//					incomingNode.addOutgoingEdge(newEdge);
-//
-//					nodesMap.get(node.getOsmId()).setDissabled(true);
-//					change=true;
-//					node.setDissabled(true);
-////					nodesMap.remove(node.getOsmId());
-//				}
-//			}
-//		}
+		boolean change=true;
+		int index2=0;
+		while(change){
+			change=false;
+			index2++;
+			System.out.println(index2);
+			for(NodeParser node : shortest.values()){
 
-//		boolean change=true;
-//		int index2=0;
-//		while(change){
-//			change=false;
-//			index2++;
-//			System.out.println(index2);
-//			for(NodeParser node : usableNodes.values()){
-//				int numberOfIncommingEdges=graph.incomingEdgesMap.get(node.getOsmId()).size();
-//				//See if node has one incomming and one outgoing edge
-//				if(node.getOutgoingEdges().size()==1 && graph.incomingEdgesMap.get(node.getOsmId()).size()==1 && !node.getDissabled()){
-//					//node id from incomming edge
-//					EdgeParser incommingEdge = graph.incomingEdgesMap.get(node.getOsmId()).get(0);
-//					EdgeParser outgoingEdge = node.getOutgoingEdges().get(0);
-//
-//					long t=nodeIndexToOsmId.get(incommingEdge.getHeadNode());
-//					boolean tl= usableNodes.containsKey(t);
-//					NodeParser incomingNode = usableNodes.get(incommingEdge.getBeginNodeOsmId());
-//					NodeParser outgoingNode = usableNodes.get(outgoingEdge.getEndNodeOsmId());
-//
-//					double distance = incommingEdge.getLength()+ outgoingEdge.getLength();
-//					EdgeParser newEdge = new EdgeParser(incomingNode.getOsmId(),outgoingNode.getOsmId(),distance);
-//
-//					//Add new edge to outoing of incomming edge
-//					incomingNode.removeOutgoingEdge(node.getOsmId());
-//					incomingNode.addOutgoingEdge(newEdge);
-//
-//					//add new incomming to outgoing edgeNode
-//					outgoingNode.removeIncommingEdge(node.getOsmId(),graph.incomingEdgesMap.get(outgoingNode.getOsmId()));
-//					graph.incomingEdgesMap.get(outgoingNode.getOsmId()).add(newEdge);
-//
-//					usableNodes.get(node.getOsmId()).setDissabled(true);
-//					change=true;
-//					node.setDissabled(true);
-////					nodesMap.remove(node.getOsmId());
-//				}
-//			}
-//		}
-//
-//
+				//See if node has one incoming and one outgoing edge
+				if(node.getOutgoingEdges().size()==1 && graph.incomingEdgesMap.get(node.getOsmId()).size()==1 && !node.getDissabled()){
 
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				JFrame frame2 = new JFrame("Graph Display after prunning");
-				frame2.add(new GraphdisplayAalst(graph.nodesMap, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId));
-				frame2.pack();
-				frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame2.setVisible(true);
+					//node id from incoming edge
+					EdgeParser incomingEdge = graph.incomingEdgesMap.get(node.getOsmId()).get(0);
+					EdgeParser outgoingEdge = node.getOutgoingEdges().get(0);
+
+					//Get Nodes
+					NodeParser incomingNode = shortest.get(incomingEdge.getBeginNodeOsmId());
+					NodeParser outgoingNode = shortest.get(outgoingEdge.getEndNodeOsmId());
+
+					//Make new edge to add to nodes
+					double distance = incomingEdge.getLength() + outgoingEdge.getLength();
+					EdgeParser newEdge = new EdgeParser(incomingNode.getOsmId(),outgoingNode.getOsmId(),distance);
+
+					//Incomming Node
+					incomingNode.removeOutgoingEdge(incomingEdge.getEndNodeOsmId());
+					incomingNode.addOutgoingEdge(newEdge);
+
+					//Outgoing Node
+					List<EdgeParser> incommingedgesArray= graph.incomingEdgesMap.get(outgoingNode.getOsmId());
+					outgoingNode.removeIncommingEdge(node.getOsmId(),incommingedgesArray);
+					graph.incomingEdgesMap.get(outgoingNode.getOsmId()).add(newEdge);
+
+					//Disable node
+					shortest.get(node.getOsmId()).setDissabled(true);
+					change=true;
+				}
 			}
-		});
+		}
 
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				JFrame frame2 = new JFrame("Graph Display of shortest connected components");
-				frame2.add(new GraphdisplayAalst(shortest, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId));
-				frame2.pack();
-				frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame2.setVisible(true);
+		Iterator<Map.Entry<Long, NodeParser>> it = shortest.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<Long, NodeParser> entry = it.next();
+			if (entry.getValue().getDissabled()) {
+				it.remove();
 			}
-		});
+		}
 
+
+		//Test
+		Dijkstra dijkstra = new Dijkstra(shortest);
+		boolean tk= dijkstra.solveDijkstra(258408294L);
+		System.out.println(tk);
+
+
+		//Display graph
+//		SwingUtilities.invokeLater(new Runnable() {
+//			public void run() {
+//				JFrame frame2 = new JFrame("Show All");
+//				frame2.add(new GraphdisplayAalst(shortest, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId,true));
+//				frame2.pack();
+//				frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//				frame2.setVisible(true);
+//			}
+//		});
+//
+//		SwingUtilities.invokeLater(new Runnable() {
+//			public void run() {
+//				JFrame frame2 = new JFrame("Show Selected");
+//				frame2.add(new GraphdisplayAalst(shortest, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId,false));
+//				frame2.pack();
+//				frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//				frame2.setVisible(true);
+//			}
+//		});
 
 
 

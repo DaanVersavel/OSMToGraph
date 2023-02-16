@@ -7,6 +7,7 @@ public class NodeParser {
 	private long osmId;
 	private double latitude;
 	private double longitude;
+	private double currenCost;
 	private boolean dissabled;
 	private List<EdgeParser> outgoingEdges = new ArrayList<>();
 
@@ -15,6 +16,14 @@ public class NodeParser {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.dissabled = false;
+	}
+
+	public double getCurrenCost() {
+		return currenCost;
+	}
+
+	public void setCurrenCost(double currenCost) {
+		this.currenCost = currenCost;
 	}
 
 	public long getOsmId() {
@@ -59,16 +68,16 @@ public class NodeParser {
 	}
 
 	public void removeOutgoingEdge(long nodeToRemove) {
-		for (int i=0;i<outgoingEdges.size();i++) {
+		for (int i = 0; i < outgoingEdges.size(); i++) {
 			EdgeParser edge = outgoingEdges.get(i);
-			if(edge.getEndNodeOsmId() == nodeToRemove) {
+			if (edge.getEndNodeOsmId() == nodeToRemove) {
 				outgoingEdges.remove(edge);
 			}
 		}
 	}
 
 	public void setDissabled(boolean b) {
-		this.dissabled= b;
+		this.dissabled = b;
 	}
 
 	public boolean getDissabled() {
@@ -84,12 +93,12 @@ public class NodeParser {
 	}
 
 	public void cleanOutgoingedges(Map<Long, NodeParser> usableNodes) {
-		ArrayList<EdgeParser> teRemoveEdge= new ArrayList<>();
-		if(outgoingEdges!= null) {
-			for(int i = 0; i < outgoingEdges.size(); i++) {
+		ArrayList<EdgeParser> teRemoveEdge = new ArrayList<>();
+		if (outgoingEdges != null) {
+			for (int i = 0; i < outgoingEdges.size(); i++) {
 				EdgeParser edge = outgoingEdges.get(i);
-				long osmEndId= edge.getEndNodeOsmId() ;
-				if(!usableNodes.containsKey(osmEndId))
+				long osmEndId = edge.getEndNodeOsmId();
+				if (!usableNodes.containsKey(osmEndId))
 					teRemoveEdge.add(edge);
 			}
 			outgoingEdges.removeAll(teRemoveEdge);
@@ -97,12 +106,12 @@ public class NodeParser {
 	}
 
 	public void cleanIncomingEdges(List<EdgeParser> incommingEdgeParsers, Map<Long, NodeParser> usableNodes, Map<Integer, Long> nodeIndexToOsmId) {
-		ArrayList<EdgeParser> teRemoveEdgeParser= new ArrayList<>();
-		if(incommingEdgeParsers!= null) {
-			for(int i = 0; i < incommingEdgeParsers.size(); i++) {
+		ArrayList<EdgeParser> teRemoveEdgeParser = new ArrayList<>();
+		if (incommingEdgeParsers != null) {
+			for (int i = 0; i < incommingEdgeParsers.size(); i++) {
 				EdgeParser edgeParser = incommingEdgeParsers.get(i);
-				long osmBeginId= nodeIndexToOsmId.get(edgeParser.getHeadNode());
-				if(!usableNodes.containsKey(osmBeginId))
+				long osmBeginId = nodeIndexToOsmId.get(edgeParser.getHeadNode());
+				if (!usableNodes.containsKey(osmBeginId))
 					teRemoveEdgeParser.add(edgeParser);
 			}
 			incommingEdgeParsers.removeAll(teRemoveEdgeParser);
@@ -110,29 +119,31 @@ public class NodeParser {
 	}
 
 	public void removeIncommingEdge(long osmId, List<EdgeParser> edgeParsers) {
-		for(int i = 0; i < edgeParsers.size(); i++) {
+		for (int i = 0; i < edgeParsers.size(); i++) {
 			EdgeParser edgeParser = edgeParsers.get(i);
-            if(edgeParser.getBeginNodeOsmId() == osmId) {
-                edgeParsers.remove(i);
-            }
+			if (edgeParser.getBeginNodeOsmId() == osmId) {
+				edgeParsers.remove(i);
+			}
 		}
 	}
 
 	public void removeOutgoingEdgeHeadNode(int nodeId, List<EdgeParser> outgoingEdgesArray) {
-		for (int i=0;i<outgoingEdgesArray.size();i++) {
+		for (int i = 0; i < outgoingEdgesArray.size(); i++) {
 			EdgeParser edge = outgoingEdgesArray.get(i);
-			if(edge.getHeadNode() == nodeId) {
+			if (edge.getHeadNode() == nodeId) {
 				outgoingEdgesArray.remove(edge);
 			}
 		}
 	}
 
 	public void removeIncommingEdgeHeadNode(int nodeId, List<EdgeParser> incomingEdgesArray) {
-		for (int i=0;i<incomingEdgesArray.size();i++) {
-            EdgeParser edge = incomingEdgesArray.get(i);
-            if(edge.getHeadNode() == nodeId) {
-                incomingEdgesArray.remove(i);
-            }
-        }
+		for (int i = 0; i < incomingEdgesArray.size(); i++) {
+			EdgeParser edge = incomingEdgesArray.get(i);
+			if (edge.getHeadNode() == nodeId) {
+				incomingEdgesArray.remove(i);
+			}
+		}
 	}
 }
+
+

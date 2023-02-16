@@ -399,8 +399,6 @@ public class RoadNetwork extends DefaultHandler {
 		for (NodeParser node : nodes) {
 			nodesMap.put(node.getOsmId(), node);
 		}
-
-
 	}
 
 	public void addOutgoingEdges(){

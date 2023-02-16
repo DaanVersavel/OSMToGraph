@@ -26,6 +26,8 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
     private boolean dragging; // flag to indicate if figure is being dragged
     private int lastX, lastY; // last mouse coordinates
 
+    private boolean bool;
+
 
 
 
@@ -39,11 +41,12 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
         return (int) (height * (longitude - minLongitude) / (maxLongitude - minLongitude));
     }
 
-    public GraphdisplayAalst(Map<Long, NodeParser> usableNodes, Map nodeMap, Map<Long, ArrayList<EdgeParser>> incomingEdgesMap, Map<Integer, Long> nodeIndexToOsmId) {
+    public GraphdisplayAalst(Map<Long, NodeParser> usableNodes, Map nodeMap, Map<Long, ArrayList<EdgeParser>> incomingEdgesMap, Map<Integer, Long> nodeIndexToOsmId,boolean bool) {
         this.usableNodes = usableNodes;
         this.nodesMap = nodeMap;
         this.incomingEdgesMap = incomingEdgesMap;
         this.nodeIndexToOsmId = nodeIndexToOsmId;
+        this.bool = bool;
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -97,23 +100,22 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
         g2d.scale(scaleFactor, scaleFactor);
 
         // draw your figure here
+        boolean dis=false;
+
+
         for (NodeParser node : usableNodes.values()) {
-            if(!node.getDissabled()){
+            if(bool){ //if bool is true, draw the node
+                dis=true;
+            } else dis=!node.getDissabled();
+
+//            if(!node.getDissabled()){
+            if(dis){
                 int x1 = getXCoordinate(node.getLatitude());
                 int y1 = getYCoordinate(node.getLongitude());
                 int size = 5;
                 g2d.setColor(Color.blue);
-                g2d.fillOval(x1 - size / 2, y1 - size / 2, size, size);
-                ArrayList<EdgeParser> ok=  incomingEdgesMap.get(node.getOsmId());
-//
-//                for(Edge edge: node.getOutgoingEdges()) {
-//                    if(included(edge.getEndNodeOsmId())) usableEdge=true;
-//                }
-//                for(EdgeParser edgeparser : incomingEdgesMap.get(node.getOsmId())){
-//                    if(included(nodeIndexToOsmId.get(edgeparser.headNode))) usableEdge=true;
-//                }
-//                if(usableEdge) {
-                    //EDGES
+                g2d.fillOval(x1 - size / 2, y1 - size / 2, size, size);//
+                //EDGES
                 if(node.getOutgoingEdges()!=null) {
                     for (EdgeParser edge : node.getOutgoingEdges()) {
                         if(included(edge.getEndNodeOsmId())){
@@ -127,9 +129,7 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
                     }
                 }
             }
-            //}
         }
-
     }
     public void setZoomLevel(double zoomLevel) {
         this.scaleFactor  = zoomLevel;
