@@ -1,23 +1,23 @@
 public class Edge {
-    private long beginNodeId;
-    private long endNodeId;
+    private long beginNodeOsmId;
+    private long endNodeOsmId;
     private double[][] speedMatrix;
     private double distance;
 
     public Edge(Long beginNodeId, Long endNodeId) {
-        this.beginNodeId = beginNodeId;
-        this.endNodeId = endNodeId;
+        this.beginNodeOsmId = beginNodeId;
+        this.endNodeOsmId = endNodeId;
     }
 
     public Edge(long beginNodeId, long endNodeId, double[][] speedMatrix, double distance) {
-        this.beginNodeId = beginNodeId;
-        this.endNodeId = endNodeId;
+        this.beginNodeOsmId = beginNodeId;
+        this.endNodeOsmId = endNodeId;
         this.speedMatrix = speedMatrix;
         this.distance = distance;
     }
     public Edge(long beginNodeId, long endNodeId, double distance) {
-        this.beginNodeId = beginNodeId;
-        this.endNodeId = endNodeId;
+        this.beginNodeOsmId = beginNodeId;
+        this.endNodeOsmId = endNodeId;
         this.distance = distance;
     }
 
@@ -55,20 +55,20 @@ public class Edge {
         return travelTime;
     }
 
-    public Long getBeginNodeId() {
-        return beginNodeId;
+    public Long getBeginNodeOsmId() {
+        return beginNodeOsmId;
     }
 
-    public void setBeginNodeId(Long beginNodeId) {
-        this.beginNodeId = beginNodeId;
+    public void setBeginNodeOsmId(Long beginNodeId) {
+        this.beginNodeOsmId = beginNodeId;
     }
 
-    public Long getEndNodeId() {
-        return endNodeId;
+    public Long getEndNodeOsmId() {
+        return endNodeOsmId;
     }
 
-    public void setEndNodeId(Long endNodeId) {
-        this.endNodeId = endNodeId;
+    public void setEndNodeOsmId(Long endNodeId) {
+        this.endNodeOsmId = endNodeId;
     }
 
     public double getDistance() {

@@ -64,9 +64,9 @@ public class DijkstraAlgorithm {
 			ArrayList<EdgeParser> edges = graph.outgoingEdges.get(id);
 
 			for(int i=0; i<edges.size(); i++) {    		  
-				double distToNode = dist + edges.get(i).travelTime;
+				double distToNode = dist + edges.get(i).getTravelTime();
 				if (distToNode < inf && distToNode >= 0) {
-					distances.add(new Vertex(edges.get(i).headNode, distToNode, id));
+					distances.add(new Vertex(edges.get(i).getHeadNode(), distToNode, id));
 				}		  
 			}   	  
 		}
