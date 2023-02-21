@@ -27,6 +27,7 @@ public class Dijkstra {
             parents.put(node.getOsmId(),-1L);
         }
 
+        System.out.println("Als fout vergeten node index aan tepassen");
         shortestTimeMap.put(start,0.0);
         NodeParser tempNode = nodes.get(start);
         tempNode.setCurrenCost(0);
@@ -42,17 +43,16 @@ public class Dijkstra {
 
             if(shortestTimeMap.get(removedNode.getOsmId())==Double.MAX_VALUE){
                 System.out.println("Node met current cost max");
-                break;
+                //break;
             }
 
-
             List<EdgeParser> edgeArrayList = removedNode.getOutgoingEdges();
-
             //update the adjacent node-time
             for(EdgeParser edge: edgeArrayList){
                 //when reaching the node
                 double distanceAtNode = shortestTimeMap.get(edge.getBeginNodeOsmId())+ edge.getLength();
                 //If better time update time and readd to pq
+                boolean t=shortestTimeMap.containsKey(edge.getEndNodeOsmId());
                 if(distanceAtNode<shortestTimeMap.get(edge.getEndNodeOsmId())){
                     shortestTimeMap.put(edge.getEndNodeOsmId(),distanceAtNode);
                     NodeParser tempnode=nodes.get(edge.getEndNodeOsmId());
@@ -65,9 +65,6 @@ public class Dijkstra {
             }
         }
 
-
-
-
         for(Double time: shortestTimeMap.values()){
             if(time==Double.MAX_VALUE){
                 System.out.println("Probleem bij");
@@ -76,7 +73,6 @@ public class Dijkstra {
         }
         System.out.println("Twerkt");
         return true;
-
     }
 
 

@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NodeParser {
 	// The OSM id of the node.
@@ -9,6 +7,7 @@ public class NodeParser {
 	private double longitude;
 	private double currenCost;
 	private boolean dissabled;
+	private Set<String> types= new HashSet<String>();
 	private List<EdgeParser> outgoingEdges = new ArrayList<>();
 
 	public NodeParser(long osmId, double latitude, double longitude) {
@@ -20,6 +19,14 @@ public class NodeParser {
 
 	public double getCurrenCost() {
 		return currenCost;
+	}
+
+	public Set<String> getTypes() {
+		return types;
+	}
+
+	public void addType(String type) {
+		types.add(type);
 	}
 
 	public void setCurrenCost(double currenCost) {
@@ -93,7 +100,7 @@ public class NodeParser {
 	}
 
 	public void cleanOutgoingedges(Map<Long, NodeParser> usableNodes) {
-		ArrayList<EdgeParser> teRemoveEdge = new ArrayList<>();
+		List<EdgeParser> teRemoveEdge = new ArrayList<>();
 		if (outgoingEdges != null) {
 			for (int i = 0; i < outgoingEdges.size(); i++) {
 				EdgeParser edge = outgoingEdges.get(i);

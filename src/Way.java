@@ -1,8 +1,9 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Way {
     private long id;
-    private String type;
+    private String type="default";
     private String name;
     private boolean canUse;
     private ArrayList<Long> nodeids;
@@ -16,7 +17,8 @@ public class Way {
     public Way(long id) {
         this.id = id;
         this.nodeids = new ArrayList<>();
-        this.canUse = true;
+        this.canUse = false;
+        this.name = "";
     }
 
     public void addNodeid(long nodeid) {
@@ -61,6 +63,10 @@ public class Way {
 
     public void setNodeids(ArrayList<Long> nodeids) {
         this.nodeids = nodeids;
+    }
+
+    public void addNodeids(List<Long> nodeids) {
+        this.nodeids.addAll(nodeids);
     }
 }
 

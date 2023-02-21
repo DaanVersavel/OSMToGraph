@@ -122,7 +122,10 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
                             NodeParser target = nodesMap.get(edge.getEndNodeOsmId());
                             int x2 = getXCoordinate(target.getLatitude());
                             int y2 = getYCoordinate(target.getLongitude());
-                            g2d.setColor(Color.red);
+                            if(edge.getEdgeType().equals("")){
+                                g2d.setColor(Color.green);
+                            } else {g2d.setColor(Color.red);
+                            }
                             g2d.drawLine(x1, y1, x2, y2);
                         }
 

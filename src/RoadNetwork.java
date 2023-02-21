@@ -43,7 +43,9 @@ public class RoadNetwork extends DefaultHandler {
 
 	// List of all the Ways in the Graph
 	public List<Way> ways;
-	
+	public Map<String,Way> wayMap = new HashMap<>();
+
+
 	private boolean inWay = false;
 	private boolean isHighway = false;
 	private String key, valHighway, valOneway;
@@ -402,19 +404,13 @@ public class RoadNetwork extends DefaultHandler {
 	}
 
 	public void addOutgoingEdges(){
-		//add  outgoing edge to node
-//		for(long key : nodesMap.keySet()) {
-//			NodeParser nodeParser = nodesMap.get(key);
-//			ArrayList<EdgeParser> edgesArray = outgoingEdgesMap.get(key);
-//			nodeParser.setOutgoingEdges(edgesArray);
-//		}
 		for(NodeParser node : nodes) {
 			ArrayList<EdgeParser> edgesArray = outgoingEdgesMap.get(node.getOsmId());
 			node.setOutgoingEdges(edgesArray);
 		}
 	}
 
-	public void pruneNotIpmortantNode(Set<Long> usableNodesIds) {
+	public void pruneNotImportantNode(Set<Long> usableNodesIds) {
 		ArrayList<NodeParser> nodesToRemove = new ArrayList<>();
 		for(int i =0; i<nodes.size(); i++) {
 			NodeParser node = nodes.get(i);
@@ -490,6 +486,21 @@ public class RoadNetwork extends DefaultHandler {
 		}
 
 		return componentSize;
+	}
+
+	public void joinWays() {
+
+		wayMap = new HashMap<>();
+		for(Way way : ways) {
+			if(way.isCanUse()){
+				if(wayMap.containsKey(way.getName())) {
+					Way wayOfMap= wayMap.get(way.getName());
+					wayOfMap.addNodeids(way.getNodeids());
+				}
+				else wayMap.put(way.getName(), way);
+			}
+
+		}
 	}
 
 //	public RoadNetwork deepCopy(RoadNetwork copy) {
