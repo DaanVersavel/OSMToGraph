@@ -22,7 +22,7 @@ public class GraphDisplay extends JPanel {
         return (int) (height * (longitude - minLongitude) / (maxLongitude - minLongitude));
     }
 
-    public GraphDisplay(RoadNetwork graph ) {
+    public GraphDisplay(RoadNetwork graph) {
         this.graph = graph;
     }
 
@@ -36,8 +36,8 @@ public class GraphDisplay extends JPanel {
                 int size = 5;
                 g.setColor(Color.blue);
                 g.fillOval(x1 - size / 2, y1 - size / 2, size, size);
-                for (Edge edge : node.getOutgoingEdges()) {
-                    int nodeId= graph.osmIdToNodeIndex.get(edge.getEndNodeId());
+                for (EdgeParser edge : node.getOutgoingEdges()) {
+                    int nodeId= graph.osmIdToNodeIndex.get(edge.getEndNodeOsmId());
                     if(graph.nodes.size()>nodeId) {
                         NodeParser target = graph.nodes.get(nodeId);
                         int x2 = getXCoordinate(target.getLatitude());
