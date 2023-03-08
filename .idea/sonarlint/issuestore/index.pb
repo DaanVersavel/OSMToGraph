@@ -7,11 +7,6 @@ B
 src/Input/info.txt,7\2\72b314f11eb7f5762f2d2b9c7103871b07749a09
 ?
 src/Input/Aalst,c\d\cd87f48a119fe509b778d9b6d00ea85eb0c3a619
-:
-
-Aalst.json,8\d\8da574cf35ccffa4d780307f1206d10ea5a23039
-G
-osm-to-graph-master.iml,0\8\08a3a7424469b11b4eef4d5af7e1f4b1f9b79734
 C
 src/EdgeParser.java,2\8\2852628ed5002b4f979bb01d10fd0fe4b84c4aff
 M
@@ -20,3 +15,5 @@ B
 src/Input/map1.osm,b\8\b8337f155ce1c34bec9bdf4ad1c38a774217ed45
 J
 src/DijkstraAlgorithm.java,f\9\f92b17ae7ab3fe0589c6ede7a16225ecae786cb0
+A
+src/Input/map.osm,b\2\b2d101a008559e7eb624ef19396c07be4b0e4b00

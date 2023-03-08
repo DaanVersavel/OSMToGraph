@@ -304,7 +304,9 @@ public class RoadNetwork extends DefaultHandler {
 				String atr=attributes.getValue("v");
 				if(atr.equals("footway") || atr.equals("pedestrian")||atr.equals("cycleway")||atr.equals("unclassified")
 				||atr.equals("service")||atr.equals("track")||atr.equals("path")||atr.equals("platform") ||
-						atr.equals("trunk_link")||atr.equals("steps")||atr.equals("no")) {
+						atr.equals("trunk_link")||atr.equals("steps")||atr.equals("no")||atr.equals("corridor")
+						||atr.equals("bridleway") || atr.equals("passing_place")||atr.equals("proposed")
+						||atr.equals("road")||atr.equals("construction")) {
 					ways.get(ways.size()-1).setType(atr);
 					ways.get(ways.size()-1).setCanUse(false);
 				}
@@ -412,7 +414,9 @@ public class RoadNetwork extends DefaultHandler {
 
 	public void pruneNotImportantNode(Set<Long> usableNodesIds) {
 		ArrayList<NodeParser> nodesToRemove = new ArrayList<>();
+		List<NodeParser> nodesToKeep = new ArrayList<>();
 		for(int i =0; i<nodes.size(); i++) {
+			if(i%10000==0) System.out.println(i);
 			NodeParser node = nodes.get(i);
 			if(!usableNodesIds.contains(node.getOsmId())) {
 				//remove incoming edges
@@ -436,10 +440,17 @@ public class RoadNetwork extends DefaultHandler {
 				outgoingEdges.set(i,new ArrayList<>());
 				nodesToRemove.add(node);
 			}
+			//TODO NEW
+			else {
+                nodesToKeep.add(node);
+            }
 		}
 
+
+
 		//remove nodes itself
-		nodes.removeAll(nodesToRemove);
+		//nodes.removeAll(nodesToRemove);
+		this.nodes= nodesToKeep;
 
 	}
 

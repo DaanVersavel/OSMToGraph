@@ -27,7 +27,7 @@ public class Dijkstra {
             parents.put(node.getOsmId(),-1L);
         }
 
-        System.out.println("Als fout vergeten node index aan tepassen");
+        //System.out.println("Als fout vergeten node index aan tepassen");
         shortestTimeMap.put(start,0.0);
         NodeParser tempNode = nodes.get(start);
         tempNode.setCurrenCost(0);

@@ -17,12 +17,19 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
 //    private double maxLongitude = 4.11;
 //    private double minLatitude = 50.90; //horizontal
 //    private double maxLatitude = 51.0;
-
-    private double minLongitude = 4.00;//vertical
-    private double maxLongitude = 4.06;
+    //Aalst
+//    private double minLongitude = 4.00;//vertical
+//    private double maxLongitude = 4.06;
+//    //private double minLatitude = 50.93; //horizontal
+//    private double minLatitude = 50.91; //horizontal
+//    private double maxLatitude = 50.97;
+    //Gent
+    private double minLongitude = 3.552701950073242;//vertical
+    private double maxLongitude = 3.97766375541687;
     //private double minLatitude = 50.93; //horizontal
-    private double minLatitude = 50.91; //horizontal
-    private double maxLatitude = 50.97;
+    private double minLatitude = 50.9666748046875
+            ; //horizontal
+    private double maxLatitude = 51.14466857910156;
 
     private double scaleFactor = 1.0;
     private int x, y; // coordinates of the figure
@@ -117,9 +124,10 @@ public class GraphdisplayAalst extends JPanel implements MouseListener, MouseMot
                 int x1 = getXCoordinate(node.getLatitude());
                 int y1 = getYCoordinate(node.getLongitude());
                 int size = 5;
-                if(nodesWithError.contains(node.getOsmId())){
-                    g2d.setColor(Color.green);
-                }else g2d.setColor(Color.blue);
+//                if(nodesWithError.contains(node.getOsmId())){
+//                    g2d.setColor(Color.green);
+//                }else
+                    g2d.setColor(Color.blue);
 
 
 

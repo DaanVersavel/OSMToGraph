@@ -4,7 +4,8 @@ import java.util.*;
 
 public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		String osmFilepath = "src/Input/Aalst";
+		//String osmFilepath = "src/Input/Aalst";
+		String osmFilepath = "src/Input/Gent.osm";
 		//String osmFilepath = "src/Input/map1.osm";
 		//String osmFilepath = "src/Input/map.osm";
 		String region = "Aalst";
@@ -24,6 +25,7 @@ public class Main {
 		//join ways based on streetname
 		graph.joinWays();
 		Set<Long> usableNodesIds = new LinkedHashSet<>();
+		System.out.println("Joined ways");
 
 
 		//add all on basis of type of road from all nodes
@@ -39,6 +41,7 @@ public class Main {
 				//usableNodesIds.addAll(w.getNodeids());
 			}
 		}
+		System.out.println("number of usablenode: " + usableNodesIds.size());
 
 
 
@@ -47,7 +50,9 @@ public class Main {
 		}
 		graph.fillInMaps(nodeIndexToOsmId);
 		graph.addOutgoingEdges();
+		System.out.println("start pruning nodes");
 		graph.pruneNotImportantNode(usableNodesIds);
+		System.out.println("Start looking for largets connected graph");
 
 		//graph.reduceToLargestConnectedComponent();
 		Map<Long,NodeParser> shortest= graph.getLargestConnectedComponent2();
@@ -172,12 +177,14 @@ public class Main {
 						//Disable node
 						shortest.get(node.getOsmId()).setDissabled(true);
 						change=true;
-					}else {
-						System.out.println();
 					}
+//					else {
+//						System.out.println();
+//					}
 				}
 			}
 		}
+		System.out.println("Done with merging edges and start with removing dissabled nodes");
 
 
 		//remove dissabled nodes
@@ -189,15 +196,10 @@ public class Main {
 			}
 		}
 
-//		List<NodeParser> nodeWithoutOutgoing = new ArrayList<>();
-//		for(NodeParser node: shortest.values()) {
-//			if(node.getOutgoingEdges().size()<1){
-//				//node.setDissabled(true);
-//				nodeWithoutOutgoing.add(node);
-//				List<EdgeParser> tg =  graph.incomingEdgesMap.get(node.getOsmId());
-//			}
-//		}
 
+
+
+		System.out.println("start with removing nodes without outgoing edges");
 		//remove nodes without outgoing edges
 		boolean changedNode=true;
 		int index=0;
@@ -229,20 +231,37 @@ public class Main {
 			index++;
 			System.out.println(index);
 		}
+		//System.out.println(shortest);
+
+		System.out.println("Start with test");
+		System.out.println("nodes to test " + shortest.size());
+
+		List<NodeParser> list = new ArrayList<>();
+		for(NodeParser node : shortest.values()){
+			for(EdgeParser edge : node.getOutgoingEdges()){
+				if(edge.getEdgeType().equals("road")){
+					list.add(node);
+				}
+			}
+		}
+		System.out.println();
 
 
 		//Test
-		int numberOfFaults=0;
-		List<Long> nodesWithError = new ArrayList<>();
-		for(NodeParser node : shortest.values()){
-			Dijkstra dijkstra = new Dijkstra(shortest);
-			if(!dijkstra.solveDijkstra(node.getOsmId())){
-				numberOfFaults++;
-				nodesWithError.add(node.getOsmId());
-			}
-		}
-		System.out.println("Number of faults: " + numberOfFaults);
-		System.out.println("Number of nodes: " + shortest.size());
+//		int numberOfFaults=0;
+//		List<Long> nodesWithError = new ArrayList<>();
+//		int index34=0;
+//		for(NodeParser node : shortest.values()){
+//			index34++;
+//			if(index34%10==0) System.out.println("Tested " + index34 + " nodes");
+//			Dijkstra dijkstra = new Dijkstra(shortest);
+//			if(!dijkstra.solveDijkstra(node.getOsmId())){
+//				numberOfFaults++;
+//				nodesWithError.add(node.getOsmId());
+//			}
+//		}
+//		System.out.println("Number of faults: " + numberOfFaults);
+//		System.out.println("Number of nodes: " + shortest.size());
 
 //		Dijkstra dijkstra = new Dijkstra(shortest);
 //		boolean tb=shortest.containsKey(258408294L);
@@ -259,13 +278,20 @@ public class Main {
 //			frame2.setVisible(true);
 //		});
 
-		SwingUtilities.invokeLater(() -> {
-			JFrame frame2 = new JFrame("Show Selected");
-			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,nodesWithError));
-			frame2.pack();
-			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame2.setVisible(true);
-		});
+//		SwingUtilities.invokeLater(() -> {
+//			JFrame frame2 = new JFrame("Show Selected");
+//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,nodesWithError));
+//			frame2.pack();
+//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame2.setVisible(true);
+//		});
+//		SwingUtilities.invokeLater(() -> {
+//			JFrame frame2 = new JFrame("Show Selected");
+//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,new ArrayList<>()));
+//			frame2.pack();
+//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame2.setVisible(true);
+//		});
 
 
 		Set<String> waytypes= new HashSet<>();
@@ -282,6 +308,7 @@ public class Main {
 
 		Output output = new Output(shortest);
 		output.writeToFile("out");
+		System.out.println("Done");
 
 
 	}
