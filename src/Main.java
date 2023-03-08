@@ -4,8 +4,10 @@ import java.util.*;
 
 public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		String osmFilepath = "src/Input/Aalst";
+		//String osmFilepath = "src/Input/Aalst";
+		String osmFilepath = "src/Input/Gent.osm";
 		//String osmFilepath = "src/Input/map1.osm";
+		//String osmFilepath = "src/Input/map.osm";
 		String region = "Aalst";
 
 		RoadNetwork graph = new RoadNetwork(region);
@@ -20,21 +22,37 @@ public class Main {
 			nodeIndexToOsmId.put(graph.osmIdToNodeIndex.get(key), key);
 		}
 
+		//join ways based on streetname
 		graph.joinWays();
 		Set<Long> usableNodesIds = new LinkedHashSet<>();
+		System.out.println("Joined ways");
+
+
 		//add all on basis of type of road from all nodes
+		graph.fillInNodeMap();
+
+		//add waytype to nodes
 		for (Way w : graph.ways) {
 			if (w.isCanUse()) {
-				usableNodesIds.addAll(w.getNodeids());
+				for(long nodeid : w.getNodeids()){
+					graph.nodesMap.get(nodeid).addType(w.getType());
+					usableNodesIds.add(nodeid);
+				}
+				//usableNodesIds.addAll(w.getNodeids());
 			}
 		}
+		System.out.println("number of usablenode: " + usableNodesIds.size());
+
+
+
 		for (Long key : graph.osmIdToNodeIndex.keySet()) {
 			nodeIndexToOsmId.put(graph.osmIdToNodeIndex.get(key),key);
 		}
 		graph.fillInMaps(nodeIndexToOsmId);
 		graph.addOutgoingEdges();
+		System.out.println("start pruning nodes");
 		graph.pruneNotImportantNode(usableNodesIds);
-		graph.fillInNodeMap();
+		System.out.println("Start looking for largets connected graph");
 
 		//graph.reduceToLargestConnectedComponent();
 		Map<Long,NodeParser> shortest= graph.getLargestConnectedComponent2();
@@ -52,28 +70,13 @@ public class Main {
 //			}
 //		}
 
-		for(Way way : graph.wayMap.values()){
-			if(way.isCanUse()==false){
-				System.out.println();
-			}
-		}
-
+		//clean incomming and outgoing edges from the largest graph component
 		for(NodeParser node : shortest.values()) {
-			for(EdgeParser edge: node.getOutgoingEdges()){
-				for(Way way : graph.wayMap.values()){
-					if(way.getNodeids().contains(edge.getBeginNodeOsmId())&&way.isCanUse()&&way.getNodeids().contains(edge.getEndNodeOsmId())){
-						edge.setEdgeType(way.getType());
-						node.addType(way.getType());
-                        break;
-					}
-				}
-			}
+			node.cleanIncomingEdges(graph.incomingEdgesMap.get(node.getOsmId()),shortest, nodeIndexToOsmId);
+			node.cleanOutgoingedges(shortest);
 		}
 
-		List<EdgeParser> tl = new ArrayList<>();
-
-
-		//TODO MAg dit wel
+		//add type if begin and end node have same type
 		for(NodeParser node: shortest.values()) {
 			for(EdgeParser edge: node.getOutgoingEdges()){
 				if(edge.getEdgeType().equals("")){
@@ -89,6 +92,8 @@ public class Main {
 			}
 		}
 
+
+        //add type if begin node has a type if not chose end type
 		for(NodeParser node: shortest.values()) {
 			for(EdgeParser edge: node.getOutgoingEdges()){
 				if(edge.getEdgeType().equals("")){
@@ -106,28 +111,24 @@ public class Main {
 							break;
 						}
 					}
-					if(edge.getEdgeType().equals("")){
-						tl.add(edge);
-					}
 				}
 			}
 		}
 
-		System.out.println(tl);
+
+		for(NodeParser node: shortest.values()) {
+			for(EdgeParser edge: node.getOutgoingEdges()){
+				if(edge.getEdgeType().equals("")){
+					System.out.println("fefef");
+				}
+			}
+		}
+
 
 
 		System.out.println("Largest component number of nodes:");
 		System.out.println("nodes: " + shortest.size());
 
-		//clean incomming and outgoing edges from largest graph component
-		for(NodeParser node : shortest.values()) {
-//			node.cleanIncomingEdges(graph.incomingEdgesMap.get(node.getOsmId()),usableNodes, nodeIndexToOsmId);
-			node.cleanOutgoingedges(shortest);
-		}
-
-		//TODO largest connected werkt en verkleinen ook
-		//TODO nog wegType toekennen aan edges
-		//TODO eventueel grafisch fixen uitbreiden
 
 		//nodes with 1 outgoing edges and 1 incomming edges
 		boolean change=true;
@@ -177,9 +178,13 @@ public class Main {
 						shortest.get(node.getOsmId()).setDissabled(true);
 						change=true;
 					}
+//					else {
+//						System.out.println();
+//					}
 				}
 			}
 		}
+		System.out.println("Done with merging edges and start with removing dissabled nodes");
 
 
 		//remove dissabled nodes
@@ -192,80 +197,120 @@ public class Main {
 		}
 
 
+
+
+		System.out.println("start with removing nodes without outgoing edges");
+		//remove nodes without outgoing edges
+		boolean changedNode=true;
+		int index=0;
+		while(changedNode){
+			changedNode=false;
+			Iterator<NodeParser> itNode = shortest.values().iterator();
+			while(itNode.hasNext()){
+				NodeParser node = itNode.next();
+				if(node.getOutgoingEdges().isEmpty()){
+					int s=graph.incomingEdgesMap.get(node.getOsmId()).size();
+					Iterator<EdgeParser> itEdge =graph.incomingEdgesMap.get(node.getOsmId()).iterator();
+					while(itEdge.hasNext()){
+						EdgeParser edge = itEdge.next();
+						NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
+						begin.removeOutgoingEdge(node.getOsmId());
+						itEdge.remove();
+						//graph.incomingEdgesMap.get(node.getOsmId()).remove(edge);
+					}
+//					for(int i=0;i<graph.incomingEdgesMap.get(node.getOsmId()).size();i++){
+//						EdgeParser edge = graph.incomingEdgesMap.get(node.getOsmId()).get(0);
+//						NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
+//						begin.removeOutgoingEdge(node.getOsmId());
+//						graph.incomingEdgesMap.get(node.getOsmId()).remove(edge);
+//					}
+					changedNode=true;
+					itNode.remove();
+				}
+			}
+			index++;
+			System.out.println(index);
+		}
+		//System.out.println(shortest);
+
+		System.out.println("Start with test");
+		System.out.println("nodes to test " + shortest.size());
+
+		List<NodeParser> list = new ArrayList<>();
+		for(NodeParser node : shortest.values()){
+			for(EdgeParser edge : node.getOutgoingEdges()){
+				if(edge.getEdgeType().equals("road")){
+					list.add(node);
+				}
+			}
+		}
+		System.out.println();
+
+
 		//Test
-		Dijkstra dijkstra = new Dijkstra(shortest);
-		boolean tb=shortest.containsKey(533710846L);
-		boolean tk= dijkstra.solveDijkstra(533710829L);
-		System.out.println(tk);
-
-
-//		//Display graph
-//		SwingUtilities.invokeLater(new Runnable() {
-//			public void run() {
-//				JFrame frame2 = new JFrame("Show All");
-//				frame2.add(new GraphdisplayAalst(shortest, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId,true));
-//				frame2.pack();
-//				frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//				frame2.setVisible(true);
+//		int numberOfFaults=0;
+//		List<Long> nodesWithError = new ArrayList<>();
+//		int index34=0;
+//		for(NodeParser node : shortest.values()){
+//			index34++;
+//			if(index34%10==0) System.out.println("Tested " + index34 + " nodes");
+//			Dijkstra dijkstra = new Dijkstra(shortest);
+//			if(!dijkstra.solveDijkstra(node.getOsmId())){
+//				numberOfFaults++;
+//				nodesWithError.add(node.getOsmId());
 //			}
+//		}
+//		System.out.println("Number of faults: " + numberOfFaults);
+//		System.out.println("Number of nodes: " + shortest.size());
+
+//		Dijkstra dijkstra = new Dijkstra(shortest);
+//		boolean tb=shortest.containsKey(258408294L);
+//		boolean tk= dijkstra.solveDijkstra(258408294L);
+//		System.out.println(tk);
+
+
+		//Display graph
+//		SwingUtilities.invokeLater(() -> {
+//			JFrame frame2 = new JFrame("Show All");
+//			frame2.add(new GraphdisplayAalst(shortest, graph, nodeIndexToOsmId,true));
+//			frame2.pack();
+//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame2.setVisible(true);
 //		});
 
 //		SwingUtilities.invokeLater(() -> {
 //			JFrame frame2 = new JFrame("Show Selected");
-//			frame2.add(new GraphdisplayAalst(shortest, graph.nodesMap, graph.incomingEdgesMap, nodeIndexToOsmId,false));
+//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,nodesWithError));
+//			frame2.pack();
+//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//			frame2.setVisible(true);
+//		});
+//		SwingUtilities.invokeLater(() -> {
+//			JFrame frame2 = new JFrame("Show Selected");
+//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,new ArrayList<>()));
 //			frame2.pack();
 //			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //			frame2.setVisible(true);
 //		});
 
 
-		Set<String> wautypes= new HashSet<>();
+		Set<String> waytypes= new HashSet<>();
 		for(NodeParser node : shortest.values()){
             for(EdgeParser edge : node.getOutgoingEdges()){
-				wautypes.add(edge.getEdgeType());
+				waytypes.add(edge.getEdgeType());
 			}
         }
-		for(String type : wautypes){
+		//print out the types of ways
+		for(String type : waytypes){
 			System.out.println(type);
 		}
 
 
 		Output output = new Output(shortest);
 		output.writeToFile("out");
+		System.out.println("Done");
 
-		Map<String,Double[][]> speedMatrixMap= getSpeedMatrixMap();
-		System.out.println();
-	}
 
-	private static Map<String, Double[][]> getSpeedMatrixMap() {
-		Map<String, Double[][]> speedMatrixMap = new HashMap<>();
-		//Primary
-
-		Double[][] speedMatrix = {{0.0,25200.0,19.4444},{25200.0,32400.0,11.1111},{32400.0,43200.0,19.4444},{43200.0,46800.0,16.6666},{46800.0,55800.0,19.4444},{55800.0,68400.0,11.1111},{68400.0,86400.0,19.4444}};
-		speedMatrixMap.put("primary", speedMatrix);
-		//Secondary
-		Double[][] speedMatrix2 = {{0.0, 25200.0, 13.8888}, {25200.0, 32400.0, 8.3333}, {32400.0, 43200.0, 13.8888},{43200.0,46800.0,13.8888}, {46800.0,55800.0,13.8888}, {55800.0,68400.0,8.3333}, {68400.0,86400.0,13.8888}};
-		speedMatrixMap.put("secondary", speedMatrix2);
-		//Tertiary
-		Double[][] speedMatrix3 = {{0.0, 25200.0, 13.8888}, {25200.0, 32400.0, 8.3333}, {32400.0, 43200.0, 13.8888},{43200.0,46800.0,13.8888}, {46800.0,55800.0,13.8888}, {55800.0,68400.0,8.3333}, {68400.0,86400.0,13.8888}};
-		speedMatrixMap.put("tertiary", speedMatrix3);
-		//Residential
-		Double[][] speedMatrix4 = {{0.0, 25200.0, 13.8888}, {25200.0, 32400.0, 8.3333}, {32400.0, 43200.0, 13.8888},{43200.0,46800.0,8.3333}, {46800.0,55800.0,13.8888}, {55800.0,68400.0,8.3333}, {68400.0,86400.0,13.8888}};
-		speedMatrixMap.put("residential", speedMatrix4);
-		//living_street
-		Double[][] speedMatrix5 = {{0.0, 25200.0, 5.5555}, {25200.0, 32400.0, 5.5555}, {32400.0, 43200.0, 5.55550},{43200.0,46800.0,5.5555}, {46800.0,55800.0,5.5555}, {55800.0,68400.0,5.5555}, {68400.0,86400.0,5.5555}};
-		speedMatrixMap.put("living_street", speedMatrix5);
-		//motor_link
-		Double[][] speedMatrix6 = {{0.0,25200.0,19.4444},{25200.0,32400.0,11.1111},{32400.0,43200.0,19.4444},{43200.0,46800.0,16.6666},{46800.0,55800.0,19.4444},{55800.0,68400.0,11.1111},{68400.0,86400.0,19.4444}};
-		speedMatrixMap.put("motor_link", speedMatrix6);
-		//trunk
-		Double[][] speedMatrix7 = {{0.0, 25200.0,19.4444}, {25200.0,32400.0,19.4444}, {32400.0, 43200.0, 19.4444},{43200.0,46800.0,19.4444}, {46800.0,55800.0,19.4444}, {55800.0,68400.0,19.4444}, {68400.0,86400.0,19.4444}};
-		speedMatrixMap.put("trunk", speedMatrix7);
-		//motorway
-		Double[][] speedMatrix8 = {{0.0, 25200.0, 33.3333}, {25200.0, 32400.0, 27.7777}, {32400.0, 43200.0, 30.5555},{43200.0,46800.0,27.7777}, {46800.0,55800.0,30.5555}, {55800.0,68400.0,25.0}, {68400.0,86400.0,33.3333}};
-		speedMatrixMap.put("motorway", speedMatrix8);
-
-		return speedMatrixMap;
 	}
 }
 

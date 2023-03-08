@@ -7,7 +7,7 @@ public class NodeParser {
 	private double longitude;
 	private double currenCost;
 	private boolean dissabled;
-	private Set<String> types= new HashSet<String>();
+	private Set<String> types;
 	private List<EdgeParser> outgoingEdges = new ArrayList<>();
 
 	public NodeParser(long osmId, double latitude, double longitude) {
@@ -15,6 +15,7 @@ public class NodeParser {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.dissabled = false;
+		this.types= new HashSet<>();
 	}
 
 	public double getCurrenCost() {
@@ -79,6 +80,7 @@ public class NodeParser {
 			EdgeParser edge = outgoingEdges.get(i);
 			if (edge.getEndNodeOsmId() == nodeToRemove) {
 				outgoingEdges.remove(edge);
+				break;
 			}
 		}
 	}
@@ -117,8 +119,8 @@ public class NodeParser {
 		if (incommingEdgeParsers != null) {
 			for (int i = 0; i < incommingEdgeParsers.size(); i++) {
 				EdgeParser edgeParser = incommingEdgeParsers.get(i);
-				long osmBeginId = nodeIndexToOsmId.get(edgeParser.getHeadNode());
-				if (!usableNodes.containsKey(osmBeginId))
+//				long osmBeginId = nodeIndexToOsmId.get(edgeParser.getHeadNode());
+				if (!usableNodes.containsKey(edgeParser.getBeginNodeOsmId()))
 					teRemoveEdgeParser.add(edgeParser);
 			}
 			incommingEdgeParsers.removeAll(teRemoveEdgeParser);
