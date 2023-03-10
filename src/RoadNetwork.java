@@ -102,144 +102,7 @@ public class RoadNetwork extends DefaultHandler {
 		incomingEdges.get(headNode).add(incomingEdge);
 		numEdges += 1;
 	}
-	
-	// Reduce graph to largest connected component
-	public void reduceToLargestConnectedComponent() {
 
-		// Create a copy of outgoing Edges to preserve its contents
-		ArrayList<ArrayList<EdgeParser>> outgoingEdgesCopy = new ArrayList<>();
-
-		for (int i=0; i<numNodes; i++) {
-			ArrayList<EdgeParser> edges = outgoingEdges.get(i);
-			ArrayList<EdgeParser> edgesCopy = new ArrayList<>();
-			for (int j=0; j<edges.size(); j++) {
-				int headNode = edges.get(j).headNode;
-				double length = edges.get(j).getLength();
-				double travelTime = edges.get(j).getTravelTime();
-				edgesCopy.add(new EdgeParser(headNode, length, travelTime));
-			}
-			outgoingEdgesCopy.add(edgesCopy);
-		}
-
-		// Combine incoming and outgoing Edges Arrays in the outgoingEdges array to make
-		// it an undirected graph
-		for(int i=0; i<numNodes; i++) {
-			ArrayList<EdgeParser> inEdges = incomingEdges.get(i);
-			ArrayList<EdgeParser> outEdges = outgoingEdges.get(i);
-			for(int j=0; j<inEdges.size(); j++) {
-				boolean found = false;
-				for (int k=0; k<outEdges.size(); k++) {
-					if (inEdges.get(j).headNode == outEdges.get(k).headNode) {
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					outEdges.add(inEdges.get(j));
-			}
-		}
-
-		// Mark value
-		int round = 1;
-
-		// Number of connected nodes for a given mark
-		int rep = 0;
-
-		// Largest set of connected nodes
-		int largestSize = 0;
-
-		// Mark corresponding to largest set of connected nodes
-		int largestMark = 1;
-
-		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(this);
-
-		// Find Largest Connected Components by marking visited nodes with 'ROUND'
-		// and then count the number of visited nodes for each ROUND value
-		for (int i=0; i<numNodes; i++) {
-
-			//System.out.println(i);
-			// Run Dijkstra from node i if not visited in a previous processing
-			// and i has at least a single EdgeParser connection
-			if (dijkstra.visitedNodes.get(i) != 0 ||
-					dijkstra.graph.outgoingEdges.get(i).size() == 0)
-				continue;
-
-			dijkstra.computeShortestPathCost(i, -1);
-			dijkstra.setVisitedNodeMark(round);
-
-			rep = 0;
-			for (int j=0; j<numNodes; j++) {
-				if (dijkstra.visitedNodes.get(j) == round)
-					rep += 1;
-			}
-
-			if (rep > largestSize) {
-				largestSize = rep;
-				largestMark = round;
-			}
-
-			if (largestSize >= numNodes/2)
-				break;
-			round += 1;
-		}
-
-		// Set back outgoingEdges array to its original content
-		outgoingEdges = outgoingEdgesCopy;
-
-		// Set to null all nodes that are not in the Largest Connected Component
-		// and calculate offset (number of nodes to remove)
-		ArrayList<Integer> nodesNewIndexes = new ArrayList<>();
-		int offset = numNodes-largestSize;
-
-		for (int i=0; i<numNodes; i++) {
-			if (dijkstra.visitedNodes.get(i) != largestMark) {
-				incomingEdges.set(i, null);
-				outgoingEdges.set(i, null);
-				nodes.set(i, null);
-			}
-			nodesNewIndexes.add(-1);
-		}
-
-		dijkstra = null;
-
-		// Update nodes indexes
-		for (int i=numNodes-1; i>0; i--) {
-			if (nodes.get(i) == null)
-				offset -=1;
-			else
-				nodesNewIndexes.set(i, i-offset);
-		}
-
-		// Remove all nodes that are not in the Largest Connected Component
-		incomingEdges.removeAll(Collections.singleton(null));
-		outgoingEdges.removeAll(Collections.singleton(null));
-		nodes.removeAll(Collections.singleton(null));
-
-		// Update head-nodes indices in the Adjacency Matrix
-		// Update number of Nodes and Edges of the reduced Graph
-		numNodes = nodes.size();
-		numEdges = 0;
-
-		for (int i=0; i<numNodes; i++) {
-			ArrayList<EdgeParser> outEdges = outgoingEdges.get(i);
-			ArrayList<EdgeParser> inEdges = incomingEdges.get(i);
-			numEdges += inEdges.size();
-
-			for (int j=0; j<outEdges.size(); j++) {
-				int oldIndex = outEdges.get(j).headNode;
-				int newIndex = nodesNewIndexes.get(oldIndex);
-				if (newIndex != -1)
-					outgoingEdges.get(i).get(j).headNode = newIndex;
-			}
-			for (int j=0; j<inEdges.size(); j++) {
-				int oldIndex = inEdges.get(j).headNode;
-				int newIndex = nodesNewIndexes.get(oldIndex);
-				if (newIndex != -1)
-					incomingEdges.get(i).get(j).headNode = newIndex;
-			}
-		}
-		nodesNewIndexes.clear();
-	}
 	
 	public void parseOsmFile(String osmFilepath) {
 		osmIdToNodeIndex = new HashMap<>();
@@ -302,17 +165,15 @@ public class RoadNetwork extends DefaultHandler {
 			key = attributes.getValue("k");
 			if (key.equals("highway")) {
 				String atr=attributes.getValue("v");
-				if(atr.equals("footway") || atr.equals("pedestrian")||atr.equals("cycleway")||atr.equals("unclassified")
-				||atr.equals("service")||atr.equals("track")||atr.equals("path")||atr.equals("platform") ||
-						atr.equals("trunk_link")||atr.equals("steps")||atr.equals("no")||atr.equals("corridor")
-						||atr.equals("bridleway") || atr.equals("passing_place")||atr.equals("proposed")
-						||atr.equals("road")||atr.equals("construction")||atr.equals("services")||atr.equals("emergency_bay")) {
+				if(atr.equals("primary") || atr.equals("primary_link")||atr.equals("secondary")||atr.equals("secondary_link")
+				||atr.equals("tertiary")||atr.equals("tertiary_link")||atr.equals("residential")||atr.equals("living_street") ||
+						atr.equals("motorway_link")||atr.equals("trunk")||atr.equals("motorway")) {
 					ways.get(ways.size()-1).setType(atr);
-					ways.get(ways.size()-1).setCanUse(false);
+					ways.get(ways.size()-1).setCanUse(true);
 				}
 				else{
 					ways.get(ways.size()-1).setType(atr);
-					ways.get(ways.size()-1).setCanUse(true);
+					ways.get(ways.size()-1).setCanUse(false);
 				}
 
 				isHighway = true;
@@ -416,7 +277,6 @@ public class RoadNetwork extends DefaultHandler {
 		ArrayList<NodeParser> nodesToRemove = new ArrayList<>();
 		List<NodeParser> nodesToKeep = new ArrayList<>();
 		for(int i =0; i<nodes.size(); i++) {
-			if(i%10000==0) System.out.println(i);
 			NodeParser node = nodes.get(i);
 			if(!usableNodesIds.contains(node.getOsmId())) {
 				//remove incoming edges
@@ -514,53 +374,5 @@ public class RoadNetwork extends DefaultHandler {
 		}
 	}
 
-//	public RoadNetwork deepCopy(RoadNetwork copy) {
-//
-//
-//		// Number of Nodes and Edges in the Graph
-//		this.numNodes=copy.nodes.size();
-//		this.numEdges=copy.numEdges;
-//
-//		//Graph Adjacency lists for outgoing and incoming Edges
-//		this.outgoingEdges = new ArrayList<>();
-//		for(int i=0; i<copy.outgoingEdges.size(); i++) {
-//			ArrayList<EdgeParser> temp= new ArrayList<>();
-//
-//			for(EdgeParser edge : copy.outgoingEdges.get(i)) {
-//				temp.add(edge.deepCopy(edge));
-//			}
-//			this.outgoingEdges.add(temp);
-//		}
-//		for(int i=0; i<copy.incomingEdges.size(); i++) {
-//			ArrayList<EdgeParser> temp= new ArrayList<>();
-//			for(EdgeParser edge : copy.incomingEdges.get(i)) {
-//				temp.add(edge.deepCopy(edge));
-//			}
-//			this.incomingEdges.add(temp);
-//		}
-//
-//		// List of all the nodes in the Graph
-//		for(NodeParser node : copy.nodes) {
-//			this.nodes.add(node.deepCopy(node));
-//		}
-//
-//		// Maps osmId of a node to its index in the nodes list
-//		for(long l : copy.osmIdToNodeIndex.keySet()) {
-//			this.osmIdToNodeIndex.put(l,copy.osmIdToNodeIndex.get(l));
-//		}
-//
-//		// List of all road types in the osm file
-//		this.roadTypes.addAll(copy.roadTypes);
-//
-//		// Used to reference all the nodes that make up that particular "way" in the .osm file
-//		this.wayNodes.addAll(copy.wayNodes);
-//
-//        // Speed values based on road type, should be set according to the region
-//        this.speeds.putAll(copy.speeds);
-//
-//        // List of all the Ways in the Graph
-//        this.ways.addAll(copy.ways);
-//
-//        return this;
-//	}
+
 }

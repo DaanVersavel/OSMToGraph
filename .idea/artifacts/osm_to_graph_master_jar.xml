@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="osm-to-graph-master:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/osm_to_graph_master_jar</output-path>
+    <root id="archive" name="osm-to-graph-master.jar">
+      <element id="module-output" name="osm-to-graph-master" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../json-simple-1.1.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

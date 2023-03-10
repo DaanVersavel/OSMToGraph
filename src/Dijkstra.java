@@ -27,7 +27,6 @@ public class Dijkstra {
             parents.put(node.getOsmId(),-1L);
         }
 
-        //System.out.println("Als fout vergeten node index aan tepassen");
         shortestTimeMap.put(start,0.0);
         NodeParser tempNode = nodes.get(start);
         tempNode.setCurrenCost(0);
@@ -42,7 +41,6 @@ public class Dijkstra {
             NodeParser removedNode= pq.remove();
 
             if(shortestTimeMap.get(removedNode.getOsmId())==Double.MAX_VALUE){
-                System.out.println("Node met current cost max");
                 break;
             }
 
@@ -65,15 +63,11 @@ public class Dijkstra {
             }
         }
 
-        int index= 0;
         for(Double time: shortestTimeMap.values()){
             if(time==Double.MAX_VALUE){
-                System.out.println("Probleem bij");
                 return false;
             }
-            index++;
         }
-        //System.out.println("Twerkt");
         return true;
     }
 

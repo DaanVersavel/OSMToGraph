@@ -4,12 +4,13 @@ import java.util.*;
 
 public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		//String osmFilepath = "src/Input/Aalst.osm";
-		//String osmFilepath = "src/Input/Gent.osm";
+		String osmFilepath = args[0];
+		//String osmFilepath = "src/Input/Aalst";
 		//String osmFilepath = "src/Input/Oost-Vlaanderen.osm";
-		String osmFilepath = "src/Input/Vlaanderen.osm";
+		//String osmFilepath = "src/Input/Vlaanderen.osm";
 		//String osmFilepath = "src/Input/map.osm";
-		String region = "Vlaanderen";
+		String region = args[1];
+		//String region = "aalst";
 
 		RoadNetwork graph = new RoadNetwork(region);
 		graph.parseOsmFile(osmFilepath);
@@ -26,7 +27,6 @@ public class Main {
 		//join ways based on streetname
 		graph.joinWays();
 		Set<Long> usableNodesIds = new LinkedHashSet<>();
-		System.out.println("Joined ways");
 
 
 		//add all on basis of type of road from all nodes
@@ -42,33 +42,16 @@ public class Main {
 				//usableNodesIds.addAll(w.getNodeids());
 			}
 		}
-		System.out.println("number of usablenode: " + usableNodesIds.size());
-
-
 
 		for (Long key : graph.osmIdToNodeIndex.keySet()) {
 			nodeIndexToOsmId.put(graph.osmIdToNodeIndex.get(key),key);
 		}
 		graph.fillInMaps(nodeIndexToOsmId);
 		graph.addOutgoingEdges();
-		System.out.println("start pruning nodes");
 		graph.pruneNotImportantNode(usableNodesIds);
-		System.out.println("Start looking for largets connected graph");
 
 		Map<Long,NodeParser> shortest= graph.getLargestConnectedComponent2();
 
-		System.out.println("number of connected nodes: " + shortest.size());
-
-//		for(NodeParser node : shortest.values()) {
-//			for(EdgeParser edge: node.getOutgoingEdges()){
-//				for(Way way : graph.ways){
-//					if(way.getNodeids().contains(edge.getBeginNodeOsmId())&&way.getNodeids().contains(edge.getEndNodeOsmId())){
-//						edge.setEdgeType(way.getType());
-//						break;
-//					}
-//				}
-//			}
-//		}
 
 		//clean incomming and outgoing edges from the largest graph component
 		for(NodeParser node : shortest.values()) {
@@ -116,27 +99,14 @@ public class Main {
 		}
 
 
-		for(NodeParser node: shortest.values()) {
-			for(EdgeParser edge: node.getOutgoingEdges()){
-				if(edge.getEdgeType().equals("")){
-					System.out.println("fefef");
-				}
-			}
-		}
-
-
-
 		System.out.println("Largest component number of nodes:");
 		System.out.println("nodes: " + shortest.size());
 
 
 		//nodes with 1 outgoing edges and 1 incomming edges
 		boolean change=true;
-		int index2=0;
 		while(change){
 			change=false;
-			index2++;
-			System.out.println(index2);
 			for(NodeParser node : shortest.values()){
 
 				//See if node has one incoming and one outgoing edge
@@ -178,14 +148,9 @@ public class Main {
 						shortest.get(node.getOsmId()).setDissabled(true);
 						change=true;
 					}
-//					else {
-//						System.out.println();
-//					}
 				}
 			}
 		}
-		System.out.println("Done with merging edges and start with removing dissabled nodes");
-
 
 		//remove dissabled nodes
 		Iterator<Map.Entry<Long, NodeParser>> it = shortest.entrySet().iterator();
@@ -196,13 +161,8 @@ public class Main {
 			}
 		}
 
-
-
-
-		System.out.println("start with removing nodes without outgoing edges");
 		//remove nodes without outgoing edges
 		boolean changedNode=true;
-		int index=0;
 		while(changedNode){
 			changedNode=false;
 			Iterator<NodeParser> itNode = shortest.values().iterator();
@@ -218,23 +178,11 @@ public class Main {
 						itEdge.remove();
 						//graph.incomingEdgesMap.get(node.getOsmId()).remove(edge);
 					}
-//					for(int i=0;i<graph.incomingEdgesMap.get(node.getOsmId()).size();i++){
-//						EdgeParser edge = graph.incomingEdgesMap.get(node.getOsmId()).get(0);
-//						NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
-//						begin.removeOutgoingEdge(node.getOsmId());
-//						graph.incomingEdgesMap.get(node.getOsmId()).remove(edge);
-//					}
 					changedNode=true;
 					itNode.remove();
 				}
 			}
-			index++;
-			System.out.println(index);
 		}
-		//System.out.println(shortest);
-
-		System.out.println("Start with test");
-		System.out.println("nodes to test " + shortest.size());
 
 		List<NodeParser> list = new ArrayList<>();
 		for(NodeParser node : shortest.values()){
@@ -244,7 +192,6 @@ public class Main {
 				}
 			}
 		}
-		System.out.println();
 
 
 		//Test
@@ -269,30 +216,6 @@ public class Main {
 //		System.out.println(tk);
 
 
-		//Display graph
-//		SwingUtilities.invokeLater(() -> {
-//			JFrame frame2 = new JFrame("Show All");
-//			frame2.add(new GraphdisplayAalst(shortest, graph, nodeIndexToOsmId,true));
-//			frame2.pack();
-//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//			frame2.setVisible(true);
-//		});
-
-//		SwingUtilities.invokeLater(() -> {
-//			JFrame frame2 = new JFrame("Show Selected");
-//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,nodesWithError));
-//			frame2.pack();
-//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//			frame2.setVisible(true);
-//		});
-//		SwingUtilities.invokeLater(() -> {
-//			JFrame frame2 = new JFrame("Show Selected");
-//			frame2.add(new GraphdisplayAalst(shortest,graph, nodeIndexToOsmId,false,new ArrayList<>()));
-//			frame2.pack();
-//			frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//			frame2.setVisible(true);
-//		});
-
 		Map<String,Double> defaultSpeeds = makeDefaultSpeedMap();
 
 
@@ -303,10 +226,6 @@ public class Main {
 				edge.setDefaultTravelTime(edge.getLength()/ defaultSpeeds.get(edge.getEdgeType()));
 			}
         }
-		//print out the types of ways
-		for(String type : waytypes){
-			System.out.println(type);
-		}
 
 
 		Output output = new Output(shortest);
