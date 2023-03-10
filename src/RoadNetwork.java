@@ -306,7 +306,7 @@ public class RoadNetwork extends DefaultHandler {
 				||atr.equals("service")||atr.equals("track")||atr.equals("path")||atr.equals("platform") ||
 						atr.equals("trunk_link")||atr.equals("steps")||atr.equals("no")||atr.equals("corridor")
 						||atr.equals("bridleway") || atr.equals("passing_place")||atr.equals("proposed")
-						||atr.equals("road")||atr.equals("construction")) {
+						||atr.equals("road")||atr.equals("construction")||atr.equals("services")||atr.equals("emergency_bay")) {
 					ways.get(ways.size()-1).setType(atr);
 					ways.get(ways.size()-1).setCanUse(false);
 				}

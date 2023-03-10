@@ -6,6 +6,7 @@ public class EdgeParser {
 	private double travelTime;
 	private long beginNodeOsmId;
 	private long endNodeOsmId;
+	private double defaultTravelTime;
 	private String edgeType;
 	
 	public EdgeParser(int headNode, double length, double travelTime) {
@@ -74,5 +75,13 @@ public class EdgeParser {
 
 	public void setEndNodeOsmId(long endNodeOsmId) {
 		this.endNodeOsmId = endNodeOsmId;
+	}
+
+	public double getDefaultTravelTime() {
+		return defaultTravelTime;
+	}
+
+	public void setDefaultTravelTime(double defaultTravelTime) {
+		this.defaultTravelTime = defaultTravelTime;
 	}
 }
