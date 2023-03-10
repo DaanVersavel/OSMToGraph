@@ -1,11 +1,0 @@
-
-t
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(ª¿êŽüÿÿÿÿ8¬Ïµ›ê0
-W
-java:S18547"5Remove this useless assignment to local variable "t".(¿þ• ýÿÿÿÿ8¬Ïµ›ê0
-]	java:S125"<This block of commented-out lines of code should be removed.(ò·ä©ùÿÿÿÿ8»Ùü´ê0
-H
-java:S14817"&Remove this unused "t" local variable.(¿þ• ýÿÿÿÿ8¯Ïµ›ê0
-G
-java:S1481D"*Remove this unused "index" local variable.(ìüà·8°Ïµ›ê0
-]	java:S125L"<This block of commented-out lines of code should be removed.(ø„Ïìùÿÿÿÿ8°Ïµ›ê0
