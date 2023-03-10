@@ -4,11 +4,12 @@ import java.util.*;
 
 public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		//String osmFilepath = "src/Input/Aalst";
-		String osmFilepath = "src/Input/Gent.osm";
-		//String osmFilepath = "src/Input/map1.osm";
+		//String osmFilepath = "src/Input/Aalst.osm";
+		//String osmFilepath = "src/Input/Gent.osm";
+		//String osmFilepath = "src/Input/Oost-Vlaanderen.osm";
+		String osmFilepath = "src/Input/Vlaanderen.osm";
 		//String osmFilepath = "src/Input/map.osm";
-		String region = "Aalst";
+		String region = "Vlaanderen";
 
 		RoadNetwork graph = new RoadNetwork(region);
 		graph.parseOsmFile(osmFilepath);
@@ -54,7 +55,6 @@ public class Main {
 		graph.pruneNotImportantNode(usableNodesIds);
 		System.out.println("Start looking for largets connected graph");
 
-		//graph.reduceToLargestConnectedComponent();
 		Map<Long,NodeParser> shortest= graph.getLargestConnectedComponent2();
 
 		System.out.println("number of connected nodes: " + shortest.size());
@@ -293,11 +293,14 @@ public class Main {
 //			frame2.setVisible(true);
 //		});
 
+		Map<String,Double> defaultSpeeds = makeDefaultSpeedMap();
+
 
 		Set<String> waytypes= new HashSet<>();
 		for(NodeParser node : shortest.values()){
             for(EdgeParser edge : node.getOutgoingEdges()){
 				waytypes.add(edge.getEdgeType());
+				edge.setDefaultTravelTime(edge.getLength()/ defaultSpeeds.get(edge.getEdgeType()));
 			}
         }
 		//print out the types of ways
@@ -307,10 +310,27 @@ public class Main {
 
 
 		Output output = new Output(shortest);
-		output.writeToFile("out");
+		System.out.println("print out file");
+		output.writeToFile(region);
 		System.out.println("Done");
 
 
+	}
+
+	private static Map<String, Double> makeDefaultSpeedMap() {
+		Map<String, Double> defaultSpeeds = new HashMap<>();
+        defaultSpeeds.put("motorway", 33.3333);
+        defaultSpeeds.put("motorway_link", 19.4444);
+        defaultSpeeds.put("trunk", 19.4444);
+        defaultSpeeds.put("primary", 19.4444);
+        defaultSpeeds.put("primary_link", 19.4444);
+        defaultSpeeds.put("secondary", 13.8888);
+        defaultSpeeds.put("secondary_link", 13.8888);
+        defaultSpeeds.put("tertiary", 13.8888);
+        defaultSpeeds.put("tertiary_link", 13.8888);
+        defaultSpeeds.put("residential", 13.8888);
+        defaultSpeeds.put("living_street", 13.8888);
+        return defaultSpeeds;
 	}
 }
 

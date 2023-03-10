@@ -39,6 +39,7 @@ public class Output {
                     edgeJson.put("beginNodeOsmId", edge.getBeginNodeOsmId());
                     edgeJson.put("endNodeOsmId", edge.getEndNodeOsmId());
                     edgeJson.put("edgeType", edge.getEdgeType());
+                    edgeJson.put("defaultTravelTime",edge.getDefaultTravelTime());
                     // add any other attributes for the edge
                     edgesJson.add(edgeJson);
                 }
