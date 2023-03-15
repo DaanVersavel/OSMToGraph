@@ -227,11 +227,15 @@ public class Main {
 			}
         }
 
-
-		Output output = new Output(shortest);
-		System.out.println("print out file");
+		Output2 output = new Output2(shortest);
+		System.out.println("Start writing file");
 		output.writeToFile(region);
 		System.out.println("Done");
+
+//		Output output = new Output(shortest);
+//		System.out.println("print out file");
+//		output.writeToFile(region);
+//		System.out.println("Done");
 
 
 	}

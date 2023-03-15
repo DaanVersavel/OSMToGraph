@@ -57,7 +57,11 @@ public class Output {
 
     public void writeToFile(String fileName) throws IOException {
         PrintWriter pw = new PrintWriter(fileName + ".json");
-        pw.write(jo.toJSONString());
+        System.out.println("Start converting to JSON string");
+        String jsonString = jo.toJSONString();
+        System.out.println("writing to printwriter");
+        pw.write(jsonString);
+        System.out.println("write done start flush");
         pw.flush();
         pw.close();
     }
