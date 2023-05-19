@@ -1,19 +1,19 @@
-import javax.swing.*;
-import java.io.IOException;
 import java.util.*;
 
 public class Main {
-	public static void main(String[] args) throws NumberFormatException, IOException {
+	public static void main(String[] args) throws NumberFormatException {
 		String osmFilepath = args[0];
-		//String osmFilepath = "src/Input/Aalst";
+		//String osmFilepath = "D:/Onedrives/OneDrive - KU Leuven/2022-2023/Masterproof/Testen/openstreetmapFiles/Aalst.osm";
 		//String osmFilepath = "src/Input/Oost-Vlaanderen.osm";
 		//String osmFilepath = "src/Input/Vlaanderen.osm";
 		//String osmFilepath = "src/Input/map.osm";
 		String region = args[1];
 		//String region = "aalst";
+		String breakString= "--------------------------------";
 
 		RoadNetwork graph = new RoadNetwork(region);
 		graph.parseOsmFile(osmFilepath);
+		System.out.println(breakString);
 
 		System.out.println("Total number of nodes and edges:");
 		System.out.println("nodes: " + graph.numNodes);
@@ -28,8 +28,7 @@ public class Main {
 		graph.joinWays();
 		Set<Long> usableNodesIds = new LinkedHashSet<>();
 
-
-		//add all on basis of type of road from all nodes
+		//add all nodes to map
 		graph.fillInNodeMap();
 
 		//add waytype to nodes
@@ -39,7 +38,6 @@ public class Main {
 					graph.nodesMap.get(nodeid).addType(w.getType());
 					usableNodesIds.add(nodeid);
 				}
-				//usableNodesIds.addAll(w.getNodeids());
 			}
 		}
 
@@ -75,35 +73,66 @@ public class Main {
 			}
 		}
 
+//		//add type if begin node has a type if not chose end type
+//		for(NodeParser node: shortest.values()) {
+//			for(EdgeParser edge: node.getOutgoingEdges()){
+//				if(edge.getEdgeType().equals("")){
+//					NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
+//					NodeParser end = shortest.get(edge.getEndNodeOsmId());
+//					boolean changed= false;
+//					for (String typebegin : begin.getTypes()) {
+//						edge.setEdgeType(typebegin);
+//						changed = true;
+//						break;
+//					}
+//					if(Boolean.FALSE.equals(changed)){
+//						for(String typeEnd : end.getTypes()){
+//							edge.setEdgeType(typeEnd);
+//							break;
+//						}
+//					}
+//				}
+//			}
+//		}
 
-        //add type if begin node has a type if not chose end type
+		Map<String,Integer> priorityMap = makePriorityMap();
+		//Now based on priority
+		//add type if begin node has a type if not chose end type
 		for(NodeParser node: shortest.values()) {
 			for(EdgeParser edge: node.getOutgoingEdges()){
 				if(edge.getEdgeType().equals("")){
 					NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
 					NodeParser end = shortest.get(edge.getEndNodeOsmId());
-					boolean changed= false;
-					for (String typebegin : begin.getTypes()) {
-						edge.setEdgeType(typebegin);
-						changed = true;
-						break;
-					}
-					if(Boolean.FALSE.equals(changed)){
-						for(String typeEnd : end.getTypes()){
-							edge.setEdgeType(typeEnd);
-							break;
+
+					String highestPriority = "L";
+
+					for(String type : begin.getTypes()){
+						if(priorityMap.get(type) < priorityMap.get(highestPriority)){
+							highestPriority=type;
 						}
 					}
+
+					for(String type : end.getTypes()){
+						if(priorityMap.get(type) < priorityMap.get(highestPriority)){
+							highestPriority=type;
+						}
+					}
+					edge.setEdgeType(highestPriority);
 				}
 			}
 		}
 
-
-		System.out.println("Largest component number of nodes:");
+		long numberOfEdges=0;
+		for(NodeParser node : shortest.values()){
+			numberOfEdges+=node.getOutgoingEdges().size();
+		}
+		System.out.println(breakString);
+		System.out.println("Largest component:");
 		System.out.println("nodes: " + shortest.size());
+		System.out.println("edges: " + numberOfEdges);
 
 
-		//nodes with 1 outgoing edges and 1 incomming edges
+		//nodes with 1 outgoing edges and 1 incoming edges
 		boolean change=true;
 		while(change){
 			change=false;
@@ -129,7 +158,7 @@ public class Main {
                         }
 					}
 
-					if(!roadType.equals("d")){
+					if(!roadType.equals("d") && !roadType.equals("living_street")){
 						//Make new edge to add to nodes
 						double distance = incomingEdge.getLength() + outgoingEdge.getLength();
 						EdgeParser newEdge = new EdgeParser(incomingNode.getOsmId(),outgoingNode.getOsmId(),distance);
@@ -153,13 +182,7 @@ public class Main {
 		}
 
 		//remove dissabled nodes
-		Iterator<Map.Entry<Long, NodeParser>> it = shortest.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Long, NodeParser> entry = it.next();
-			if (entry.getValue().getDissabled()) {
-				it.remove();
-			}
-		}
+		shortest.entrySet().removeIf(entry -> entry.getValue().getDissabled());
 
 		//remove nodes without outgoing edges
 		boolean changedNode=true;
@@ -169,14 +192,12 @@ public class Main {
 			while(itNode.hasNext()){
 				NodeParser node = itNode.next();
 				if(node.getOutgoingEdges().isEmpty()){
-					int s=graph.incomingEdgesMap.get(node.getOsmId()).size();
 					Iterator<EdgeParser> itEdge =graph.incomingEdgesMap.get(node.getOsmId()).iterator();
 					while(itEdge.hasNext()){
 						EdgeParser edge = itEdge.next();
 						NodeParser begin = shortest.get(edge.getBeginNodeOsmId());
 						begin.removeOutgoingEdge(node.getOsmId());
 						itEdge.remove();
-						//graph.incomingEdgesMap.get(node.getOsmId()).remove(edge);
 					}
 					changedNode=true;
 					itNode.remove();
@@ -184,76 +205,84 @@ public class Main {
 			}
 		}
 
-		List<NodeParser> list = new ArrayList<>();
+		Map<String,Double> defaultSpeeds = makeDefaultSpeedMap();
+
 		for(NodeParser node : shortest.values()){
-			for(EdgeParser edge : node.getOutgoingEdges()){
-				if(edge.getEdgeType().equals("road")){
-					list.add(node);
+            for(EdgeParser edge : node.getOutgoingEdges()){
+				edge.setDefaultTravelTime(edge.getLength()/ defaultSpeeds.get(edge.getEdgeType()));
+			}
+        }
+
+		System.out.println(breakString);
+		numberOfEdges=0;
+		for(NodeParser node : shortest.values()){
+			numberOfEdges+=node.getOutgoingEdges().size();
+		}
+		System.out.println("Number after filtering:");
+		System.out.println("nodes: " + shortest.size());
+		System.out.println("edges: " + numberOfEdges);
+		System.out.println(breakString);
+
+
+		int count=0;
+		for(NodeParser node : shortest.values()){
+			for( EdgeParser edge : node.getOutgoingEdges()){
+				if(edge.getEdgeType().equals("living_street")&& edge.getLength()>200){
+					System.out.print("");
 				}
 			}
 		}
 
 
-		//Test
-//		int numberOfFaults=0;
-//		List<Long> nodesWithError = new ArrayList<>();
-//		int index34=0;
-//		for(NodeParser node : shortest.values()){
-//			index34++;
-//			if(index34%10==0) System.out.println("Tested " + index34 + " nodes");
-//			Dijkstra dijkstra = new Dijkstra(shortest);
-//			if(!dijkstra.solveDijkstra(node.getOsmId())){
-//				numberOfFaults++;
-//				nodesWithError.add(node.getOsmId());
-//			}
-//		}
-//		System.out.println("Number of faults: " + numberOfFaults);
-//		System.out.println("Number of nodes: " + shortest.size());
-
-//		Dijkstra dijkstra = new Dijkstra(shortest);
-//		boolean tb=shortest.containsKey(258408294L);
-//		boolean tk= dijkstra.solveDijkstra(258408294L);
-//		System.out.println(tk);
-
-
-		Map<String,Double> defaultSpeeds = makeDefaultSpeedMap();
-
-
-		Set<String> waytypes= new HashSet<>();
-		for(NodeParser node : shortest.values()){
-            for(EdgeParser edge : node.getOutgoingEdges()){
-				waytypes.add(edge.getEdgeType());
-				edge.setDefaultTravelTime(edge.getLength()/ defaultSpeeds.get(edge.getEdgeType()));
-			}
-        }
-
 		Output2 output = new Output2(shortest);
 		System.out.println("Start writing file");
 		output.writeToFile(region);
 		System.out.println("Done");
-
-//		Output output = new Output(shortest);
-//		System.out.println("print out file");
-//		output.writeToFile(region);
-//		System.out.println("Done");
-
-
 	}
 
 	private static Map<String, Double> makeDefaultSpeedMap() {
 		Map<String, Double> defaultSpeeds = new HashMap<>();
-        defaultSpeeds.put("motorway", 33.3333);
-        defaultSpeeds.put("motorway_link", 19.4444);
-        defaultSpeeds.put("trunk", 19.4444);
-        defaultSpeeds.put("primary", 19.4444);
-        defaultSpeeds.put("primary_link", 19.4444);
-        defaultSpeeds.put("secondary", 13.8888);
-        defaultSpeeds.put("secondary_link", 13.8888);
-        defaultSpeeds.put("tertiary", 13.8888);
-        defaultSpeeds.put("tertiary_link", 13.8888);
-        defaultSpeeds.put("residential", 13.8888);
-        defaultSpeeds.put("living_street", 13.8888);
-        return defaultSpeeds;
+		defaultSpeeds.put("primary", 19.4444);//70
+		defaultSpeeds.put("primary_link", 19.4444);//70
+		defaultSpeeds.put("secondary", 13.8888);//50
+		defaultSpeeds.put("secondary_link", 13.8888);//50
+		defaultSpeeds.put("tertiary", 13.8888);//50
+		defaultSpeeds.put("tertiary_link", 13.8888);//50
+		defaultSpeeds.put("residential", 13.8888);//50
+
+		//defaultSpeeds.put("living_street", 13.8888);//50
+		defaultSpeeds.put("living_street", 8.33333333);//30
+
+		defaultSpeeds.put("motorway_link", 19.4444);//70
+        defaultSpeeds.put("trunk", 19.4444);//70
+		defaultSpeeds.put("motorway", 33.3333); //120
+
+		return defaultSpeeds;
+	}
+
+	private static Map<String, Integer> makePriorityMap() {
+		Map<String, Integer> priorityMap = new HashMap<>();
+		priorityMap.put("secondary", 1);//50
+		priorityMap.put("tertiary", 1);//50
+		priorityMap.put("residential", 1);//50
+
+		priorityMap.put("secondary_link", 2);//50
+		priorityMap.put("tertiary_link", 2);//50
+
+		priorityMap.put("primary", 3);//70
+		priorityMap.put("trunk", 3);//70
+
+		priorityMap.put("primary_link", 4);//70
+
+		priorityMap.put("motorway", 5); //120
+
+		priorityMap.put("motorway_link", 6);//70
+
+		priorityMap.put("living_street", 9);//50
+
+		priorityMap.put("L", 10); //120
+
+		return priorityMap;
 	}
 }
 
